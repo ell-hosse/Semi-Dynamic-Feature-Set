@@ -7,7 +7,6 @@ predictions = [
     "This feature is called the Oxidative Stability and Mouthfeel Balance Index."
 ]
 
-
 references = [
     "This feature moderately contributes to wine classification. It is strongly positively"
     " correlated with total and free sulfur dioxide and residual sugar, and strongly negatively"
@@ -29,8 +28,6 @@ references = [
     "preservative content."
 ]
 
-
-# Compute BERTScore
 P, R, F1 = score(
     predictions,
     references,
@@ -39,13 +36,13 @@ P, R, F1 = score(
     rescale_with_baseline=True
 )
 
-# Show F1 scores (the main metric people report)
 for i in range(len(predictions)):
     print(f"Label {i+1}:")
     print(f"Prediction: {predictions[i]}")
     print(f"Reference: {references[i]}")
     print(f"BERTScore F1: {F1[i].item():.4f}")
     print("------")
+
 
 from transformers import pipeline
 nli = pipeline("text-classification", model="roberta-large-mnli")
@@ -54,8 +51,8 @@ for i in range(len(predictions)):
     result = nli(f"{predictions[i]} </s> {references[i]}")
     print(f"Label {i+1}: {result[0]}")
 
-from sentence_transformers import SentenceTransformer, util
 
+from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 for i in range(len(predictions)):
