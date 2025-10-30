@@ -6,7 +6,7 @@ from sdfs.timeseries.distances import find_closest_trend
 
 
 def train(model, Xw_train, yw_train, Xw_val, yw_val, dynamic_features_list,
-          num_epochs=1, learning_rate=1e-3, weight_decay=1e-5, patience=5):
+          num_epochs=50, learning_rate=1e-3, weight_decay=1e-5, patience=5):
 
     criterion = nn.L1Loss()
 
@@ -66,7 +66,6 @@ def validate(model, Xw_train, Xw_val, yw_val, dynamic_features_list, criterion):
 
     with torch.no_grad():
         for i in range(len(Xw_val)):
-            print('val sample', i)
             static_input = torch.tensor(Xw_val[i], dtype=torch.float32)
             target = torch.tensor(yw_val[i]).unsqueeze(0)
 

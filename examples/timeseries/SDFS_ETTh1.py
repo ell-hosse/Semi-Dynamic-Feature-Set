@@ -95,8 +95,8 @@ def run_example():
     Xw_val, yw_val = build(val_df)
     Xw_test, yw_test = build(test_df)
 
-    expanded_Xw_train , expanded_Xw_val, expanded_Xw_test = sdfs(Xw_train, Xw_val[0: 1], Xw_test[0: 1],
-                                                                 yw_train, yw_val[0: 1], yw_test[0: 1],
+    expanded_Xw_train , expanded_Xw_val, expanded_Xw_test = sdfs(Xw_train, Xw_val, Xw_test,
+                                                                 yw_train, yw_val, yw_test,
                                                                  dynamic_input_size=3)
 
     return expanded_Xw_train , expanded_Xw_val, expanded_Xw_test
