@@ -79,10 +79,9 @@ class WindowDataset(Dataset):
 
 
 def run_example():
-    print("Loading ETTh1...")
     df = load_etth1(CSV_PATH)
+    print("ETTh1 has been loaded successfully.")
 
-    # Chronological 80/10/10 split
     train_df, val_df, test_df = split_time_80_10_10(df)
 
     scaler = StandardScaler().fit(train_df[FEATURES].values)
@@ -96,8 +95,8 @@ def run_example():
     Xw_val, yw_val = build(val_df)
     Xw_test, yw_test = build(test_df)
 
-    expanded_Xw_train , expanded_Xw_val, expanded_Xw_test = sdfs(Xw_train, Xw_val, Xw_test,
-                                                                 yw_train, yw_val, yw_test,
+    expanded_Xw_train , expanded_Xw_val, expanded_Xw_test = sdfs(Xw_train, Xw_val[0: 1], Xw_test[0: 1],
+                                                                 yw_train, yw_val[0: 1], yw_test[0: 1],
                                                                  dynamic_input_size=3)
 
     return expanded_Xw_train , expanded_Xw_val, expanded_Xw_test
