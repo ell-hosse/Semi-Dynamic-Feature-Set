@@ -14,9 +14,8 @@ def sdfs(Xw_train, Xw_val, Xw_test, y_train, y_val, y_test,
     dynamic_features = init_randomly(Xw_train, dynamic_input_size=dynamic_input_size)
     print("Dynamic features have been initialized successfully.")
 
-
     model = SDFS(
-        static_input_size=Xw_train.shape[1],
+        static_input_size=Xw_train.shape[2],
         dynamic_input_size=dynamic_input_size,
         hidden_size=64,
         num_layers=1,
@@ -24,14 +23,13 @@ def sdfs(Xw_train, Xw_val, Xw_test, y_train, y_val, y_test,
         bidirectional=False
     )
 
-    '''
     final_loss, loss_values, dynamic_features_trained = train(
         model, Xw_train, y_train, Xw_val, y_val, dynamic_features
     )
-    '''
-    extended_Xw_train = concat_feature_sets(Xw_train, dynamic_features)
-    extended_Xw_val = concat_dfs_to_test_samples(Xw_val, Xw_train, dynamic_features)
-    extended_Xw_test = concat_dfs_to_test_samples(Xw_test, Xw_train, dynamic_features)
+
+    extended_Xw_train = concat_feature_sets(Xw_train, dynamic_features_trained)
+    extended_Xw_val = concat_dfs_to_test_samples(Xw_val, Xw_train, dynamic_features_trained)
+    extended_Xw_test = concat_dfs_to_test_samples(Xw_test, Xw_train, dynamic_features_trained)
 
     return extended_Xw_train, extended_Xw_val, extended_Xw_test
 
