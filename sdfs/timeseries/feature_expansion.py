@@ -31,5 +31,7 @@ def sdfs(Xw_train, Xw_val, Xw_test, y_train, y_val, y_test,
     extended_Xw_val = concat_dfs_to_test_samples(Xw_val, Xw_train, dynamic_features_trained)
     extended_Xw_test = concat_dfs_to_test_samples(Xw_test, Xw_train, dynamic_features_trained)
 
+    print("Feature expansion has been completed successfully.")
+
     return extended_Xw_train, extended_Xw_val, extended_Xw_test
 

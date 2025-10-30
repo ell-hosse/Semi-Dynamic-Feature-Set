@@ -1,8 +1,9 @@
 import numpy as np
 from fastdtw import fastdtw
-from tslearn.metrics import dtw, lb_keogh
+from tslearn.metrics import dtw, lb_keogh, cdist_dtw
 
-def find_closest_trend_slow(Xw_train, test_sequence, dynamic_features_list):
+
+def find_closest_trend_normal(Xw_train, test_sequence, dynamic_features_list):
     best_train_seq_idx, best_dist = None, float('inf')
 
     for i, train_sequence in enumerate(Xw_train):
@@ -39,18 +40,15 @@ def find_closest_trend_fastdtw(Xw_train, test_sequence, dynamic_features_list):
     return dynamic_features_list[best_idx]
 
 
-import numpy as np
-from tslearn.metrics import cdist_dtw
-
 def find_closest_trend(Xw_train, test_sequence, dynamic_features_list):
     X = np.asarray(Xw_train, dtype=float)
-    q = np.asarray(test_sequence, dtype=float)[None, ...]  # shape (1, L[, d])
+    q = np.asarray(test_sequence, dtype=float)[None, ...]
 
     D = cdist_dtw(
         X, q,
-        global_constraint="sakoe_chiba",  # limits warp width
-        sakoe_chiba_radius=5,              # smaller radius = faster
-        n_jobs=-1                          # parallelize across CPU cores
+        global_constraint="sakoe_chiba",
+        sakoe_chiba_radius=5,
+        n_jobs=-1
     )
     best_idx = int(np.argmin(D[:, 0]))
     return dynamic_features_list[best_idx]
