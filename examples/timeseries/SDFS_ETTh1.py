@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sdfs.timeseries.feature_expansion import sdfs
 
 
-CSV_PATH      = "ETTh1.csv"
+CSV_PATH      = "examples/timeseries/ETTh1.csv"
 FEATURES      = ["HUFL", "HULL", "MUFL", "MULL", "LUFL", "LULL", "OT"]
 TARGET_COL    = "OT"
 
@@ -100,7 +100,3 @@ def run_example():
                                                                  dynamic_input_size=3)
 
     return expanded_Xw_train , expanded_Xw_val, expanded_Xw_test
-
-
-if __name__ == '__main__':
-    run_example()
