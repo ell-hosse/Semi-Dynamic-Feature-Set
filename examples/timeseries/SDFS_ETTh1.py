@@ -100,5 +100,5 @@ def run_example(dynamic_input_size):
                                                                  dynamic_input_size=dynamic_input_size)
 
     ETTh1.main(expanded_Xw_train.numpy(), expanded_Xw_val.numpy(), expanded_Xw_test.numpy(),
-               yw_train, yw_val, yw_test, input_size=10)
+               yw_train, yw_val, yw_test, input_size=len(FEATURES)+dynamic_input_size)
 
