@@ -78,7 +78,7 @@ class WindowDataset(Dataset):
     def __getitem__(self, i): return self.X[i], self.y[i]
 
 
-def run_example():
+def run_example(dynamic_input_size):
     df = load_etth1(CSV_PATH)
     print("ETTh1 has been loaded successfully.")
 
@@ -97,7 +97,7 @@ def run_example():
 
     expanded_Xw_train , expanded_Xw_val, expanded_Xw_test = sdfs(Xw_train, Xw_val, Xw_test,
                                                                  yw_train, yw_val, yw_test,
-                                                                 dynamic_input_size=3)
+                                                                 dynamic_input_size=dynamic_input_size)
 
     ETTh1.main(expanded_Xw_train.numpy(), expanded_Xw_val.numpy(), expanded_Xw_test.numpy(),
                yw_train, yw_val, yw_test, input_size=10)
