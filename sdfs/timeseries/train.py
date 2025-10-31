@@ -6,7 +6,7 @@ from sdfs.timeseries.distances import find_closest_trend
 
 
 def train(model, Xw_train, yw_train, Xw_val, yw_val, dynamic_features_list,
-          num_epochs=50, learning_rate=1e-3, weight_decay=1e-5, patience=5):
+          num_epochs=50, learning_rate=1e-3, weight_decay=1e-5, patience=3):
 
     criterion = nn.L1Loss()
 
