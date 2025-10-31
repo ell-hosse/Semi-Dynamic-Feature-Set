@@ -143,24 +143,7 @@ def regression_report(y_true, y_pred, name=""):
     return mae, rmse, r2
 
 
-def main():
-    print("Loading ETTh1...")
-    df = load_etth1(CSV_PATH)
-
-    # Chronological 80/10/10 split
-    train_df, val_df, test_df = split_time_80_10_10(df)
-
-    scaler = StandardScaler().fit(train_df[FEATURES].values)
-
-    def build(split_df: pd.DataFrame):
-        X = scaler.transform(split_df[FEATURES].values)
-        y = split_df[TARGET_COL].values
-        return make_windows(X, y, SEQ_LEN, HORIZON)
-
-    Xw_tr, yw_tr = build(train_df)
-    Xw_va, yw_va = build(val_df)
-    Xw_te, yw_te = build(test_df)
-
+def main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te):
     dl_tr = DataLoader(WindowDataset(Xw_tr, yw_tr), batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, drop_last=False)
     dl_va = DataLoader(WindowDataset(Xw_va, yw_va), batch_size=BATCH_SIZE, shuffle=False, num_workers=0, drop_last=False)
     dl_te = DataLoader(WindowDataset(Xw_te, yw_te), batch_size=BATCH_SIZE, shuffle=False, num_workers=0, drop_last=False)
@@ -172,6 +155,7 @@ def main():
         bidirectional=BIDIRECTIONAL,
         dropout=DROPOUT
     ).to(DEVICE)
+
     criterion = nn.L1Loss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
@@ -210,5 +194,22 @@ def main():
     naive_pred = Xw_te[:, -1, ot_idx]
     regression_report(yw_te, naive_pred, name="Naive ")
 
+
 if __name__ == "__main__":
-    main()
+    print("Loading ETTh1...")
+    df = load_etth1(CSV_PATH)
+
+    train_df, val_df, test_df = split_time_80_10_10(df)
+
+    scaler = StandardScaler().fit(train_df[FEATURES].values)
+
+    def build(split_df: pd.DataFrame):
+        X = scaler.transform(split_df[FEATURES].values)
+        y = split_df[TARGET_COL].values
+        return make_windows(X, y, SEQ_LEN, HORIZON)
+
+    Xw_tr, yw_tr = build(train_df)
+    Xw_va, yw_va = build(val_df)
+    Xw_te, yw_te = build(test_df)
+
+    main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te)

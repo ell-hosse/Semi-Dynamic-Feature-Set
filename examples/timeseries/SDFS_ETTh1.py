@@ -13,7 +13,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from sdfs.timeseries.feature_expansion import sdfs
-
+from examples.timeseries import ETTh1
 
 CSV_PATH      = "examples/timeseries/ETTh1.csv"
 FEATURES      = ["HUFL", "HULL", "MUFL", "MULL", "LUFL", "LULL", "OT"]
@@ -99,4 +99,5 @@ def run_example():
                                                                  yw_train, yw_val, yw_test,
                                                                  dynamic_input_size=3)
 
-    return expanded_Xw_train , expanded_Xw_val, expanded_Xw_test
+    ETTh1.main(expanded_Xw_train, expanded_Xw_val, expanded_Xw_test, yw_train, yw_val, yw_test)
+
