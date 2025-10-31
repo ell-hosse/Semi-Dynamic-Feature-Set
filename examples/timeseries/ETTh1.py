@@ -143,13 +143,13 @@ def regression_report(y_true, y_pred, name=""):
     return mae, rmse, r2
 
 
-def main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te):
+def main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te, input_size):
     dl_tr = DataLoader(WindowDataset(Xw_tr, yw_tr), batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, drop_last=False)
     dl_va = DataLoader(WindowDataset(Xw_va, yw_va), batch_size=BATCH_SIZE, shuffle=False, num_workers=0, drop_last=False)
     dl_te = DataLoader(WindowDataset(Xw_te, yw_te), batch_size=BATCH_SIZE, shuffle=False, num_workers=0, drop_last=False)
 
     model = LSTMRegressor(
-        input_size=len(FEATURES),
+        input_size=input_size,
         hidden_size=HIDDEN_SIZE,
         num_layers=NUM_LAYERS,
         bidirectional=BIDIRECTIONAL,
@@ -212,4 +212,4 @@ if __name__ == "__main__":
     Xw_va, yw_va = build(val_df)
     Xw_te, yw_te = build(test_df)
 
-    main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te)
+    main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te, input_size=len(FEATURES))

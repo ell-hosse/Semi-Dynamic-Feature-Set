@@ -99,5 +99,6 @@ def run_example():
                                                                  yw_train, yw_val, yw_test,
                                                                  dynamic_input_size=3)
 
-    ETTh1.main(expanded_Xw_train, expanded_Xw_val, expanded_Xw_test, yw_train, yw_val, yw_test)
+    ETTh1.main(expanded_Xw_train.numpy(), expanded_Xw_val.numpy(), expanded_Xw_test.numpy(),
+               yw_train, yw_val, yw_test, input_size=10)
 

@@ -70,7 +70,7 @@ def validate(model, Xw_train, Xw_val, yw_val, dynamic_features_list, criterion):
             target = torch.tensor(yw_val[i]).unsqueeze(0)
 
             dynamic_features = find_closest_trend(Xw_train, Xw_val[i], dynamic_features_list)
-            output = model(static_input, dynamic_features)
+            output = model(static_input, torch.tensor(dynamic_features, dtype=torch.float32))
 
             loss = criterion(output, target)
             total_loss += loss.item()
