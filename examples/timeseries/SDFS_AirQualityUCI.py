@@ -1,6 +1,6 @@
 from examples.timeseries.AirQualityUCI import *
 from sdfs.timeseries.feature_expansion import sdfs
-
+from examples.timeseries.plot_features import plot_features
 
 def run_example(dynamic_input_size):
     set_seed(SEED)
@@ -28,6 +28,9 @@ def run_example(dynamic_input_size):
 
     main(expanded_Xw_train.numpy(), expanded_Xw_val.numpy(), expanded_Xw_test.numpy(),
          yw_train, yw_val, yw_test, input_size=len(FEATURES)+dynamic_input_size)
+
+    plot_features(expanded_Xw_train, 7, 2, FEATURES)
+    plot_features(expanded_Xw_test, 7, 2, FEATURES)
 
 
 if __name__ == '__main__':
