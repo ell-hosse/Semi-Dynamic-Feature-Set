@@ -226,7 +226,7 @@ def predict(model, loader, device):
 
 def regression_report(y_true, y_pred, name=""):
     mae  = mean_absolute_error(y_true, y_pred)
-    rmse = mean_squared_error(y_true, y_pred, squared=False)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2   = r2_score(y_true, y_pred)
     print(f"{name}MAE : {mae:.4f}")
     print(f"{name}RMSE: {rmse:.4f}")
