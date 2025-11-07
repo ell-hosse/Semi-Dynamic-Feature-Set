@@ -9,16 +9,16 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-XLSX_PATH   = "AirQualityUCI.xlsx"
+XLSX_PATH   = "examples/timeseries/AirQualityUCI.xlsx"
 
-FEATURES    = ["CO(GT)", "C6H6(GT)", "NOx(GT)", "T", "RH", "AH", "NO2(GT)"]
+FEATURES    = ["CO(GT)", "C6H6(GT)", "NOx(GT)", "T", "RH", "AH"]
 TARGET_COL  = "NO2(GT)"
 
 SEQ_LEN     = 48
 HORIZON     = 1
 BATCH_SIZE  = 256
 LR          = 1e-3
-EPOCHS      = 100
+EPOCHS      = 500
 PATIENCE    = 7
 HIDDEN_SIZE = 64
 
@@ -34,6 +34,13 @@ def set_seed(seed=SEED):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
+FEATURES    = ["CO(GT)", "PT08.S1(CO)", "C6H6(GT)", "PT08.S2(NMHC)",
+        "PT08.S3(NOx)", "NO2(GT)", "PT08.S4(NO2)", "PT08.S5(O3)",
+        "T", "RH", "AH"]
+
+TARGET_COL  = "NOx(GT)"
+SEQ_LEN     = 24
+HORIZON     = 1
 
 def load_airquality(xlsx_path: str) -> pd.DataFrame:
     if not os.path.exists(xlsx_path):
@@ -66,6 +73,89 @@ def load_airquality(xlsx_path: str) -> pd.DataFrame:
         raise ValueError(
             f"Not enough clean rows ({len(clean)}) for SEQ_LEN={SEQ_LEN} & HORIZON={HORIZON}."
         )
+    print('cleaned df size =', len(clean))
+    return clean
+
+
+def load_airquality_smart(path: str,
+                          target: str = "NOx(GT)",
+                          seq_len: int = SEQ_LEN,
+                          horizon: int = HORIZON,
+                          keep_hour: bool = False) -> pd.DataFrame:
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File not found: {path}")
+
+    ext = os.path.splitext(path)[1].lower()
+    if ext in [".csv", ".txt"]:
+        df = pd.read_csv(path, sep=";", decimal=",")
+    elif ext in [".xlsx", ".xls"]:
+        df = pd.read_excel(path)
+    else:
+        raise ValueError("Unsupported file type. Use .csv, .xlsx or .xls")
+
+    # Drop unnamed junk columns
+    df = df.loc[:, ~df.columns.astype(str).str.match(r"^Unnamed")].copy()
+
+    # Date/Time handling
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce", dayfirst=True)
+    else:
+        raise ValueError("Expected 'Date' column is missing.")
+
+    if "Time" in df.columns:
+        time_parsed = pd.to_datetime(df["Time"].astype(str),
+                                     format="%H.%M.%S",
+                                     errors="coerce")
+        hour = pd.Series(np.where(time_parsed.notna(),
+                                  time_parsed.dt.hour,
+                                  pd.to_numeric(df["Time"], errors="coerce")),
+                         index=df.index).astype("Int64")
+        df["Hour"] = hour
+    else:
+        df["Hour"] = pd.NA  # keep column to avoid surprises
+
+    # Build datetime index from Date + Hour (falls back to Date when Hour missing)
+    dt = df["Date"].astype("datetime64[ns]")
+    dt = dt + pd.to_timedelta(df["Hour"].fillna(0).astype("Int64"), unit="h")
+    df["dt"] = dt
+    df = df[df["dt"].notna()].sort_values("dt").reset_index(drop=True)
+    df = df.set_index("dt")
+
+    # Replace sentinel -200 with NaN
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+    df[numeric_cols] = df[numeric_cols].replace(-200, np.nan)
+
+    # Drop the very sparse NMHC(GT) column
+    if "NMHC(GT)" in df.columns:
+        df = df.drop(columns=["NMHC(GT)"])
+
+    if target not in df.columns:
+        raise ValueError(f"Target '{target}' not found. Available: {list(df.columns)}")
+    df = df.dropna(subset=[target])  # keep rows where target is present
+
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+    df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].median())
+
+    base_features = [
+        "CO(GT)", "PT08.S1(CO)", "C6H6(GT)", "PT08.S2(NMHC)",
+        "PT08.S3(NOx)", "NO2(GT)", "PT08.S4(NO2)", "PT08.S5(O3)",
+        "T", "RH", "AH"
+    ]
+    features = [c for c in base_features if (c in df.columns and c != target)]
+
+    if keep_hour and "Hour" in df.columns:
+        features = ["Hour"] + features
+
+    used_cols = features + [target]
+    clean = df[used_cols].copy()
+
+    if len(clean) < (seq_len + horizon + 10):
+        raise ValueError(
+            f"Not enough clean rows ({len(clean)}) for SEQ_LEN={seq_len} & HORIZON={horizon}."
+        )
+
+    print(f"[AirQuality] rows after cleaning: {len(clean)} | target='{target}' | features={len(features)}")
     return clean
 
 
@@ -179,13 +269,15 @@ def main(Xw_tr, Xw_va, Xw_te, yw_tr, yw_va, yw_te, input_size):
     yt_pred, yt_true = predict(model, dl_te, DEVICE)
     regression_report(yt_true, yt_pred, name="Test ")
 
+    '''
     print("\n=== Naive baseline (last NO2(GT)) on Test ===")
     no2_idx = FEATURES.index(TARGET_COL)
     naive_pred = Xw_te[:, -1, no2_idx]
     regression_report(yw_te, naive_pred, name="Naive ")
+    '''
 
 
-if __name__ == "__main__":
+def run_example():
     set_seed(SEED)
     print("Loading AirQualityUCI (full, cleaned)...")
     df = load_airquality(XLSX_PATH)

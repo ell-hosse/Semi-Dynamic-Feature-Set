@@ -7,7 +7,7 @@ def run_example(dynamic_input_size):
     #XLSX_PATH = "examples/timeseries/AirQualityUCI.xlsx"
 
     print("Loading AirQualityUCI (full, cleaned)...")
-    df = load_airquality(XLSX_PATH)
+    df = load_airquality_smart(XLSX_PATH, target="NOx(GT)")
 
     train_df, val_df, test_df = split_time_80_10_10(df)
 
@@ -32,6 +32,3 @@ def run_example(dynamic_input_size):
     plot_features(expanded_Xw_train, 7, 2, FEATURES)
     plot_features(expanded_Xw_test, 7, 2, FEATURES)
 
-
-if __name__ == '__main__':
-    run_example(dynamic_input_size=2)
