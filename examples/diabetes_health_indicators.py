@@ -29,8 +29,16 @@ def load_dataset(test_size=0.2, validation_size=None, random_state=42):
 
     df['BMI'] = winsorize_iqr(df, 'BMI')
 
-    X = df.drop(target, axis=1).values
-    y = df[target].values
+    df_sampled = (
+        df.groupby(target, group_keys=False)
+        .apply(lambda x: x.sample(frac=100000 / len(df), random_state=42))
+        .reset_index(drop=True)
+    )
+
+    X = df_sampled.drop(target, axis=1).values
+    y = df_sampled[target].values
+
+    print(df_sampled[target].value_counts())
 
 
     X = torch.tensor(X, dtype=torch.float32)
@@ -41,6 +49,7 @@ def load_dataset(test_size=0.2, validation_size=None, random_state=42):
     if validation_size:
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=validation_size,
                                                           random_state=random_state)
+
         return X_train, X_val, X_test, y_train, y_val, y_test
 
     return X_train, X_test, y_train, y_test
@@ -56,12 +65,12 @@ def run_example():
     print("-" * 50 + '\n\n')
 
 
-    for dynamic_size in range(1, 11):
+    for dynamic_size in range(2, 11):
         print('Starting SDFS with DS size of :', dynamic_size)
         expanded_X_train, expanded_X_val, expanded_X_test = sdfs(X_train, X_val, X_test,
                                                                  y_train, y_val, y_test,
                                                                  num_classes=2,
-                                                                 dynamic_input_size=4,
+                                                                 dynamic_input_size=dynamic_size,
                                                                  init_method='PCA',
                                                                  distance_method='minkowski')
 
