@@ -147,7 +147,7 @@ def evaluate_model(model, X_test, y_test, multi_class='ovr'):
     f1 = f1_score(y_test.cpu(), test_preds.cpu(), average='macro')
 
     try:
-        roc_auc = roc_auc_score(y_test.cpu(), probabilities, multi_class=multi_class)
+        roc_auc = roc_auc_score(y_test.cpu().numpy(), probabilities[:, 1])
     except ValueError as e:
         print(f"ROC AUC calculation error: {e}")
         roc_auc = None
